@@ -1,0 +1,7 @@
+^.*\.Rproj$
+^\.Rproj\.user$
+
+cvarpyp.Rproj
+.gitignore
+README.md
+.Rhistory
