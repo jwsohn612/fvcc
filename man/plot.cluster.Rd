@@ -4,7 +4,7 @@
 \alias{plot.cluster}
 \title{Draw the posterior results of clusters}
 \usage{
-\method{plot}{cluster}(cluster.sample, burn = NULL)
+\method{plot}{cluster}(cluster_sample, burn = NULL)
 }
 \description{
 Draw the posterior results of clusters

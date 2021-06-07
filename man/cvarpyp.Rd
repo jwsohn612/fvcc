@@ -23,8 +23,8 @@ cvarpyp(
   sd_lambda = 1,
   pi.a = 1,
   pi.b = 1,
-  stick1 = c(1, 10),
-  stick2 = c(1, 10)
+  stick_act = c(1, 10),
+  stick_nact = c(1, 10)
 )
 }
 \arguments{

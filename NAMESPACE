@@ -2,11 +2,12 @@
 
 S3method(plot,cluster)
 S3method(plot,fixed_effect)
+S3method(plot,lambda)
 S3method(plot,latent_location)
+S3method(plot,nu)
 S3method(plot,random_effect)
 S3method(plot,varying_coefficient)
 export(cvarpyp)
-export(get_simulation_data)
 import(dplyr)
 import(progress)
 import(purrr)

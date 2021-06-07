@@ -1,7 +1,5 @@
 #' @import dplyr
 #' @import purrr
-#' @import rlist
-#' @import progress
 #' @importFrom truncnorm rtruncnorm
 NULL
 
@@ -32,9 +30,9 @@ cvarpyp <- function(ID, W, X = NULL, Z, t, Y,
                     sd_nu = 1, 
                     sd_lambda = 1,
                     pi.a=1, pi.b=1,
-                    stick1 = c(1,10), 
-                    stick2 = c(1,10)){
-  
+                    stick_act = c(1,10), 
+                    stick_nact = c(1,10)){
+
   temp <- preprocess_data(ID, W, X, Z, t, Y)
   ID <- temp$ID
   W <- temp$W
@@ -64,8 +62,8 @@ cvarpyp <- function(ID, W, X = NULL, Z, t, Y,
   nu_param <- 1
   
   # rinvGamma
-  n_g_k <- stick1[1] ; n_h_k <- stick1[2] # noninformative
-  i_g_k <- stick2[2] ; i_h_k <- stick2[2]
+  n_g_k <- stick_act[1] ; n_h_k <- stick_act[2] # noninformative
+  i_g_k <- stick_nact[2] ; i_h_k <- stick_nact[2]
   
   knot_position <- quantile(t, ppoints(num_knots, a=0))
   
@@ -141,7 +139,7 @@ cvarpyp <- function(ID, W, X = NULL, Z, t, Y,
   update_indi <- 1
   
   pb <- progress::progress_bar$new(
-    format = "  running pcg [:bar] :percent eta: :eta",
+    format = "  running the pcg [:bar] :percent eta: :eta",
     clear = FALSE, total = num_iters)
   
   
@@ -165,7 +163,7 @@ cvarpyp <- function(ID, W, X = NULL, Z, t, Y,
     tryCatch({
       nu <- sample_nu(nu, lambda, v, sd_nu, K_max, nu_param)
     }, error = function(e){
-      nu <- tolerance::r2exp(n = 1, rate = nu, shift=-lambda)
+      nu <- tolerance::r2exp(n = 1, rate = 1, shift=-lambda)
       
     }
     )  
@@ -231,16 +229,22 @@ cvarpyp <- function(ID, W, X = NULL, Z, t, Y,
       updated_theta <- rlist::list.append(updated_theta, theta_k)
       updated_tau <- rlist::list.append(updated_tau, tau)
       updated_Psi <- rlist::list.append(updated_Psi, Psi)
+      updated_lambda <- append(updated_lambda, lambda)
+      updated_nu <- append(updated_nu, nu)
+      
       if (!is.null(X)) updated_beta <- rlist::list.append(updated_beta, beta)
     }
   }
   
+  print("Generating model results..")
   varying_coefficient <- get_post_summary_vc(
-    t=t,                                    
+    t = t,                                    
     time_range = c(min(t), max(t)), 
     knot_position = knot_position, 
     gamma = updated_gamma, 
-    theta = updated_theta, grids = 100,  burn=NULL)
+    theta = updated_theta, 
+    grids = 100,  
+    burn=NULL)
   
   class(varying_coefficient) <- 'varying_coefficient'
   class(updated_gamma) <- 'latent_location'
@@ -250,7 +254,7 @@ cvarpyp <- function(ID, W, X = NULL, Z, t, Y,
   class(updated_Psi) <- 'random_effect'
   class(updated_beta) <- 'fixed_effect'
   class(updated_lambda) <- 'lambda'
-  class(upated_nu) <- 'nu'
+  class(updated_nu) <- 'nu'
   
   list(latent_location = updated_gamma, 
        cluster = updated_cluster,
@@ -259,6 +263,8 @@ cvarpyp <- function(ID, W, X = NULL, Z, t, Y,
        fixed_effect = updated_beta,
        dispersion = updated_tau, 
        knot_position = knot_position,
+       nu = updated_nu,
+       lambda = updated_lambda,
        time_range = c(min(t), max(t)),
        p = p,
        q = ifelse(!is.null(X), dim(X)[2],0),

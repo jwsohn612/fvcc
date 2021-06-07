@@ -333,7 +333,7 @@ get_theta_gamma_matrix <- function(p, unit_gamma, unit_theta){
 get_post_summary_vc <- function(t, time_range, knot_position, gamma, theta, grids=50, burn=NULL) {
   
   len <- length(gamma)
-  burn <- ifelse(is.null(burn), round(len/2,0), burn) 
+  burn <- ifelse(is.null(burn), round(len/2, 0), burn) 
   time_domain <- seq(from=time_range[1], to=time_range[2], l=grids)
   
   sd_ <- sd(t)

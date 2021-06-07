@@ -13,14 +13,14 @@ plot.random_effect <- function(random_effect_samples, row_position, col_position
   post_sample <- map_dbl(random_effect_samples, ~ .x[row_position, col_position])
   post_sample <- post_sample[(burn+1):len]
 
-  par(mfrow=c(1,2))
+  # par(mfrow=c(1,2))
   hist_ = hist(post_sample, breaks=10, probability=T,main="",xlab="",ylab="",col=gray(0:9/9)[8],border=gray(0:9/9)[8]);box()
   lines(hist_$breaks,c(hist_$density,0),type="s")
   abline(v=quantile(post_sample,c(0.025,0.975)),lty=2)
   abline(v=median(post_sample))
   mtext("Posterior density",side=2,line=2.3,cex=0.9)
   
-  acf(post_sample,main="")
+  # acf(post_sample,main="")
 } 
 
 #' Draw the posterior results of fixed effects
@@ -32,14 +32,14 @@ plot.fixed_effect <- function(fixed_effect_samples, position, burn=NULL) {
   post_sample <- map_dbl(fixed_effect_samples, ~ .x[position])
   post_sample <- post_sample[(burn+1):len]
   
-  par(mfrow=c(1,2))
+  # par(mfrow=c(1,2))
   hist_=hist(post_sample, breaks=10, probability=T,main="",xlab="",ylab="",col=gray(0:9/9)[8],border=gray(0:9/9)[8]);box()
   lines(hist_$breaks,c(hist_$density,0),type="s")
   abline(v=quantile(post_sample,c(0.025,0.975)),lty=2)
   abline(v=median(post_sample))
   mtext("Posterior density",side=2,line=2.3,cex=0.9)
   
-  acf(post_sample,main="")
+  # acf(post_sample,main="")
 }
 
 
@@ -94,14 +94,47 @@ plot.latent_location <- function(latent_location_samples, cluster_number, variab
 #' Draw the posterior results of clusters
 #' 
 #' @export
-plot.cluster <- function(cluster.sample, burn=NULL) {
-  len <- length(cluster.sample)
+plot.cluster <- function(cluster_sample, burn=NULL) {
+  len <- length(cluster_sample)
   if (is.null(burn)) burn = round(len/2)
-  cluster.matrix <- do.call(rbind, cluster.sample)
-  apply(cluster.matrix[(burn+1):len,], 2, function(x) {
+  cluster_matrix <- do.call(rbind, cluster_sample)
+  apply(cluster_matrix[(burn+1):len,], 2, function(x) {
     mode.value <- DescTools::Mode(x)
     mode.value[1]
   }) %>% unlist()
 }
 
+#' Draw the posterior histogram of the concentration parameter
+#' 
+#' @export
+plot.nu <- function(nu_sample, burn=NULL) {
+  len <- length(nu_sample)
+  if (is.null(burn)) burn = round(len/2)
+  
+  post_sample <- nu_sample[(burn+1):len]
+  
+  # par(mfrow=c(1,2))
+  hist_=hist(post_sample, breaks=10, probability=T,main="",xlab="",ylab="",col=gray(0:9/9)[8],border=gray(0:9/9)[8]);box()
+  lines(hist_$breaks,c(hist_$density,0),type="s")
+  abline(v=quantile(post_sample,c(0.025,0.975)),lty=2)
+  abline(v=median(post_sample))
+  mtext("Posterior density",side=2,line=2.3,cex=0.9)
+  
+  # acf(post_sample,main="")
+}
 
+#' Draw the posterior histogram of the discount parameter
+#' 
+#' @export
+plot.lambda <- function(lambda_sample, burn=NULL) {
+  len <- length(lambda_sample)
+  if (is.null(burn)) burn = round(len/2)
+  
+  post_sample <- lambda_sample[(burn+1):len]
+
+  hist_=hist(post_sample, breaks=10, probability=T,main="",xlab="",ylab="",col=gray(0:9/9)[8],border=gray(0:9/9)[8]);box()
+  lines(hist_$breaks,c(hist_$density,0),type="s")
+  abline(v=quantile(post_sample,c(0.025,0.975)),lty=2)
+  abline(v=median(post_sample))
+  mtext("Posterior density",side=2,line=2.3,cex=0.9)
+}

@@ -1,12 +1,20 @@
 Package: cvarpyp
 Type: Package
-Title: What the package does (short line)
+Title: cvarpyp
 Version: 1.0
 Date: 2021-06-08
-Author: Who wrote it
-Maintainer: Who to complain to <yourfault@somewhere.net>
-Description: More about what it does (maybe more than one line)
+Author: Jinwon Sohn
+Description: A generalized varying-coefficient model for longitudinal binary data with temporal heterogeneity. This R package  ~ 
 License: What license is it under?
-Imports: Rcpp (>= 1.0.6)
+Imports: 
+    Rcpp (>= 1.0.5),
+    dplyr,
+    purrr,
+    progress,
+    rlist,
+    truncnorm,
+    MCMCpack,
+    mvtnorm
 LinkingTo: Rcpp, RcppArmadillo
 RoxygenNote: 7.1.1
+LazyData: true

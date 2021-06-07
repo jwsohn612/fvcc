@@ -4,7 +4,6 @@
 #' @param K The number of clusters
 #' @param M The average number of observations
 #' 
-#' @export 
 get_simulation_data <- function(N, K, M, seed=0){
   
   set.seed(seed)
@@ -13,7 +12,7 @@ get_simulation_data <- function(N, K, M, seed=0){
   K <- 3 
   
   p <- 4 
-  q <- 2 
+  q <- 3
   r <- 2
   
   ID <- 1:N
@@ -30,7 +29,7 @@ get_simulation_data <- function(N, K, M, seed=0){
                      rep(1,n),
                      matrix(rnorm(n*(r-1),0,1),n,r-1),
                      matrix(runif(n,0,1),n,1))
-  names(dataset)=c("ID","var1","var2","var3","var4","fix1","fix2","re1","re2","t")
+  names(dataset)=c("ID","var1","var2","var3","var4","fix1","fix2","fix3","re1","re2","t")
   # names(dataset)=c("ID","var1","var2","var3","fix1","fix2","re1","re2","t")
 
   sbj1 <- round(N/3, 0) 
@@ -61,7 +60,7 @@ get_simulation_data <- function(N, K, M, seed=0){
     list(g3_a1,g3_a2,g3_a3,g3_a4)
   )
   
-  beta <- c(1, -1)
+  beta <- c(1, 1, 0)
   D <- matrix(c(0.5 , 0.25 , 0.25 , 0.8), nrow=2)
   bi <- mvtnorm::rmvnorm(N, mean=c(0,0), sigma = D)
   
@@ -79,6 +78,7 @@ get_simulation_data <- function(N, K, M, seed=0){
       dataset$var4[i]*alpha[[the_cluster]][[4]](dataset$t[i])+
       dataset$fix1[i]*beta[1]+
       dataset$fix2[i]*beta[2]+
+      dataset$fix3[i]*beta[3]+
       dataset$re1[i]*bi[id_,1]+
       dataset$re2[i]*bi[id_,2] + 
       rnorm(1, mean=0, sd = sigma)
