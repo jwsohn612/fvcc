@@ -59,7 +59,7 @@ Clustering Variying Coefficients with a Pitman-Yor Process
 \examples{
 library(cvarpyp)
 
-#SimulationData is an example dataset. 
+#SimulationData is an example dataset.
 
 ID <- SimulationData$ID
 W <- SimulationData[c('W1','W2','W3','W4')]
@@ -68,13 +68,13 @@ Z <- SimulationData[c('Z1','Z2')]
 t <- SimulationData$t
 Y <- SimulationData$Y
 
-output <- fcvarpyp(ID = ID, 
-               W = W, 
-               X = X, 
-               Z = Z, 
-               t = t, 
+output <- fcvarpyp(ID = ID,
+               W = W,
+               X = X,
+               Z = Z,
+               t = t,
                Y = Y,
-               num_knots = 15, 
+               num_knots = 15,
                K_max = 10,
                num_iters = 10000)
 
