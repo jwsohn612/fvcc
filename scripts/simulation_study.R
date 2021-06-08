@@ -15,8 +15,7 @@ output <- cvarpyp(ID = ID,
                   Y = Y,
                   num_knots = 15, 
                   K_max = 10,
-                  num_iters = 10000
-                    )
+                  num_iters = 10000)
 
 plot(output$fixed_effect, position = 1)
 plot(output$random_effect, row_position = 1, col_position = 1)

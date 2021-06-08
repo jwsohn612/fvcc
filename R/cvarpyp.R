@@ -6,19 +6,53 @@ NULL
 
 #' Clustering Variying Coefficients with a Pitman-Yor Process
 #' 
-#' @param ID Subjects' ID vector
+#' @param ID A vector of subjects' IDs. 
 #' @param W A part of design matrix for varying coefficients
-#' @param X A part of design matrix for overall fixed effects 
+#' @param X A part of design matrix for time-invariant fixed effects 
 #' @param Z A part of design matrix for random effects
-#' @param t A time vector
-#' @param Y A binary response vector
-#' @param num_knots The number of knots for splines
+#' @param t A vector of time observations
+#' @param Y A vector of binary responses
+#' @param num_knots The number of knots for the basis splines
 #' @param K_max The upper bound of the number of clusters for the stick-breaking process
 #' @param num_iters The number of iterations for the partially collapsed Gibbs sampler
-#' @param sampling_unit Thinning unit
+#' @param thinning_unit Thinning unit of the pcg sampler
+#' @param nu An initial value of the concentration parameter
+#' @param lambda An initial value of the discount parameter
+#' @param Psi An initial covariance matrix of the random effects 
+#' @param beta An initial vector of the fixed effects
+#' 
+#' @examples 
+#' library(cvarpyp)
+#' 
+#' #SimulationData is an example dataset. 
+#' 
+#' ID <- SimulationData$ID
+#' W <- SimulationData[c('W1','W2','W3','W4')]
+#' X <- SimulationData[c('X1','X2','X3')]
+#' Z <- SimulationData[c('Z1','Z2')]
+#' t <- SimulationData$t
+#' Y <- SimulationData$Y
+#' 
+#' output <- fcvarpyp(ID = ID, 
+#'                W = W, 
+#'                X = X, 
+#'                Z = Z, 
+#'                t = t, 
+#'                Y = Y,
+#'                num_knots = 15, 
+#'                K_max = 10,
+#'                num_iters = 10000)
+#' 
+#' plot(output$fixed_effect, position = 1)
+#' plot(output$random_effect, row_position = 1, col_position = 1)
+#' plot(output$cluster)
+#' plot(output$varying_coefficient, cluster_number = 5, variable_number = 1)
+#' plot(output$latent_location, cluster_number = 5, variable_number = 1, time_range = output$time_range, knot_position = output$knot_position)
+#' plot(output$nu)
+#' plot(output$lambda)
 #' 
 #' @export
-cvarpyp <- function(ID, W, X = NULL, Z, t, Y, 
+fcvarpyp <- function(ID, W, X = NULL, Z, t, Y, 
                     num_knots = 10, 
                     K_max, 
                     num_iters = 10000, 
@@ -26,10 +60,8 @@ cvarpyp <- function(ID, W, X = NULL, Z, t, Y,
                     nu = 1, 
                     lambda = 0.5, 
                     Psi = NULL, 
-                    kappa = 10, 
-                    sd_nu = 1, 
-                    sd_lambda = 1,
-                    pi.a=1, pi.b=1,
+                    beta = NULL,
+                    kappa = 10,
                     stick_act = c(1,10), 
                     stick_nact = c(1,10)){
 
@@ -57,8 +89,10 @@ cvarpyp <- function(ID, W, X = NULL, Z, t, Y,
   lower.tn <- log(Y)
   upper.tn <- -log(1-Y)
   
-  # beta-binomial
-  a_pi <- pi.a ; b_pi <- pi.b  # noninformative
+  sd_nu <- 0.5
+  sd_lambda <- 0.5
+  
+  a_pi <- 1 ; b_pi <- 1  # noninformative
   nu_param <- 1
   
   # rinvGamma
@@ -83,8 +117,12 @@ cvarpyp <- function(ID, W, X = NULL, Z, t, Y,
     }
   }
   
+  
   Psi_0 <- diag(r)
-  beta <- rnorm(q, sd = 1/sqrt(q))
+  
+  if (is.null(beta)){
+    beta <- rnorm(q, sd = 1/sqrt(q))  
+  }
   
   
   bi <- map(1:NSbj, ~ MASS::mvrnorm(1, mu=rep(0,r), Sigma=Psi))
