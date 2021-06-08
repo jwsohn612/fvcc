@@ -1,9 +1,11 @@
 Package: cvarpyp
 Type: Package
 Title: A generalized varying-coefficient model for longitudinal binary data with temporal heterogeneity.
-Version: 1.0
+Version: 1.0.0
 Date: 2021-06-08
 Author: Jinwon Sohn
+Maintainer: Jinwon Sohn <sohn24@purdue.edu>
+Depends: R (>= 3.5.0)
 Description: This R package has a function that carry out the functional clustering for varying coefficients of binary mixed-effects models.
 License: What license is it under?
 Imports: 
@@ -18,3 +20,4 @@ Imports:
 LinkingTo: Rcpp, RcppArmadillo
 RoxygenNote: 7.1.1
 LazyData: true
+Encoding: UTF-8
