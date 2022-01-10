@@ -104,10 +104,8 @@ fcvarpyp <- function(ID,
   nu_param <- 1
   
   # rinvGamma
-  n_g_k <- 1/2
-  n_h_k <- NSbj/2
-  i_g_k <- 1/2
-  i_h_k <- NSbj/2
+  g_k <- 1/2
+  h_k <- NSbj/2
   
   knot_position <- quantile(t, ppoints(num_knots, a = 0))
   
@@ -162,11 +160,11 @@ fcvarpyp <- function(ID,
   pu <- r
   D <- diag(r)
   
-  g_vec <- rep(n_g_k, K_max)
-  h_vec <- rep(n_h_k, K_max)
+  g_vec <- rep(g_k, K_max)
+  h_vec <- rep(h_k, K_max)
   tau <- MCMCpack::rinvgamma(n = K_max,
-                             shape = n_g_k / 2,
-                             scale = n_h_k / 2)
+                             shape = g_k / 2,
+                             scale = h_k / 2)
   gamma <- map(1:K_max, function(x) {
     temp <-
       matrix(rbinom(
@@ -361,9 +359,9 @@ fcvarpyp <- function(ID,
     # Draw tau
     num_of_ones_vars <- map_dbl(1:K_max, ~ sum(gamma[[.x]]))
     g_vec <-
-      map_dbl(1:K_max, ~ ifelse((.x %in% active), n_g_k, i_g_k))
+      map_dbl(1:K_max, ~ ifelse((.x %in% active), g_k, g_k))
     h_vec <-
-      map_dbl(1:K_max, ~ ifelse((.x %in% active), n_h_k, i_h_k))
+      map_dbl(1:K_max, ~ ifelse((.x %in% active), h_k, h_k))
     tau <-
       map_dbl(1:K_max,
               ~ MCMCpack::rinvgamma(
