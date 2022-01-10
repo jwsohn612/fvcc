@@ -104,10 +104,10 @@ fcvarpyp <- function(ID,
   nu_param <- 1
   
   # rinvGamma
-  n_g_k <- stick_act[1]
-  n_h_k <- stick_act[2] # noninformative
-  i_g_k <- stick_nact[2]
-  i_h_k <- stick_nact[2]
+  n_g_k <- 1/2
+  n_h_k <- NSbj/2
+  i_g_k <- 1/2
+  i_h_k <- NSbj/2
   
   knot_position <- quantile(t, ppoints(num_knots, a = 0))
   
@@ -412,6 +412,8 @@ fcvarpyp <- function(ID,
       )
     if (runif(1) < sum(unlist(probs_Psi[[1]])))
       Psi <- proposed_Psi
+    
+    Psi_0 <- Psi
     
     # Draw Li
     L_sbj <-
