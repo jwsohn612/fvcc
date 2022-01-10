@@ -1,8 +1,8 @@
 library(cvarpyp)
 
 ID <- SimulationData$ID
-W <- SimulationData[c('W1', 'W2')]#,'W3','W4')]
-X <- SimulationData[c('X1', 'X2')]#,'X3')]
+W <- SimulationData[c('W1', 'W2')]
+X <- SimulationData[c('X1', 'X2')]
 Z <- SimulationData[c('Z1', 'Z2')]
 t <- SimulationData$t
 Y <- SimulationData$Y
