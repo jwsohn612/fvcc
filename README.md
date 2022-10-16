@@ -1,6 +1,6 @@
 # fvcc
 
-This is a R package for Efficient Varying Coefficient
+This is a R package for Functional clustering methods for binary longitudinal data with temporal heterogeneity
 
 ### Resources
 
