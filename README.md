@@ -1,14 +1,14 @@
-# cvarpyp
+# fvcc
 
 This is a R package for Efficient Varying Coefficient
 
 ### Resources
 
-For more details, please refer to [cvarpyp](https://jwsohn612.github.io/).
+For more details, please refer to [fvcc](https://jwsohn612.github.io/).
 
 ### Installation
 ```
-devtools::install_github("jwsohn612/cvarpyp")
+devtools::install_github("jwsohn612/fvcc")
 ```
 
 ### Sofeware requirements
