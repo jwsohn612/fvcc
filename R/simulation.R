@@ -30,8 +30,7 @@ get_simulation_data <- function(sbj1, sbj2, sbj3, seed=0){
                      rep(1,n),
                      matrix(rnorm(n*(r-1),0,1),n,r-1),
                      matrix(runif(n,0,1),n,1))
-  names(dataset)=c("ID","var1","var2","fix1","fix2","re1","re2","t")
-  # names(dataset)=c("ID","var1","var2","var3","fix1","fix2","re1","re2","t")
+  names(dataset)=c("ID","W1","W2","X1","X2","Z1","Z2","t")
 
   clusters <- c(rep(1,sbj1),rep(2,sbj2),rep(3,sbj3))
   dataset$G <- unlist(sapply(1:N, function(x) rep(clusters[x],ni[x])))
@@ -63,12 +62,12 @@ get_simulation_data <- function(sbj1, sbj2, sbj3, seed=0){
     
     id_ <- id[i]
     Li[i] <- 
-      dataset$var1[i]*alpha[[the_cluster]][[1]](dataset$t[i])+
-      dataset$var2[i]*alpha[[the_cluster]][[2]](dataset$t[i])+
-      dataset$fix1[i]*beta[1]+
-      dataset$fix2[i]*beta[2]+
-      dataset$re1[i]*bi[id_,1]+
-      dataset$re2[i]*bi[id_,2] + 
+      dataset$W1[i]*alpha[[the_cluster]][[1]](dataset$t[i])+
+      dataset$W2[i]*alpha[[the_cluster]][[2]](dataset$t[i])+
+      dataset$X1[i]*beta[1]+
+      dataset$X2[i]*beta[2]+
+      dataset$Z1[i]*bi[id_,1]+
+      dataset$Z2[i]*bi[id_,2] + 
       rnorm(1, mean=0, sd = sigma)
     
     if(Li[i]>=0){Yi[i]<-1}else{Yi[i]<-0}
