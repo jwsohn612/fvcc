@@ -15,4 +15,5 @@ devtools::install_github("jwsohn612/fvcc")
   - [clang, gfortran](https://cran.r-project.org/bin/macosx/tools/)
 
 
-
+### Simulation Study 
+   - Simulation study in Section 4.2 can be implemented via simulation_study.r in the script folder. 
