@@ -269,7 +269,6 @@ fvcc <- function(ID,
     v <-  c(sapply(1:(K_max-1), function(k) rbeta(1, 1 + num_of_ones_K_sbjs[k], nu+sum(num_of_ones_K_sbjs[(k+1):K_max]))),1)
     Diri_p <- get_DP_pi(v, K_max)
     
-    
     temp <-
       byproducts(
         num_obs_per_sbj,
