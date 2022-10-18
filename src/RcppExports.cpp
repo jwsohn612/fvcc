@@ -6,9 +6,14 @@
 
 using namespace Rcpp;
 
+#ifdef RCPP_USE_GLOBAL_ROSTREAM
+Rcpp::Rostream<true>&  Rcpp::Rcout = Rcpp::Rcpp_cout_get();
+Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
+#endif
+
 // byproducts
-List byproducts(arma::vec num_obs, int K, int NSbj, List C_star_sbj, List gamma, List X_sbj, arma::vec beta, List Z_sbj, List L_sbj, arma::mat Psi, arma::mat Psi0, arma::vec ID, arma::vec Clusters, arma::vec active, Function flatten_gamma);
-RcppExport SEXP _cvarpyp_byproducts(SEXP num_obsSEXP, SEXP KSEXP, SEXP NSbjSEXP, SEXP C_star_sbjSEXP, SEXP gammaSEXP, SEXP X_sbjSEXP, SEXP betaSEXP, SEXP Z_sbjSEXP, SEXP L_sbjSEXP, SEXP PsiSEXP, SEXP Psi0SEXP, SEXP IDSEXP, SEXP ClustersSEXP, SEXP activeSEXP, SEXP flatten_gammaSEXP) {
+List byproducts(arma::vec num_obs, int K, int NSbj, List C_star_sbj, List gamma, List X_sbj, arma::vec beta, List Z_sbj, List L_sbj, arma::mat Psi, arma::vec ID, arma::vec Clusters, arma::vec active, Function flatten_gamma);
+RcppExport SEXP _fvcc_byproducts(SEXP num_obsSEXP, SEXP KSEXP, SEXP NSbjSEXP, SEXP C_star_sbjSEXP, SEXP gammaSEXP, SEXP X_sbjSEXP, SEXP betaSEXP, SEXP Z_sbjSEXP, SEXP L_sbjSEXP, SEXP PsiSEXP, SEXP IDSEXP, SEXP ClustersSEXP, SEXP activeSEXP, SEXP flatten_gammaSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -22,18 +27,17 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< List >::type Z_sbj(Z_sbjSEXP);
     Rcpp::traits::input_parameter< List >::type L_sbj(L_sbjSEXP);
     Rcpp::traits::input_parameter< arma::mat >::type Psi(PsiSEXP);
-    Rcpp::traits::input_parameter< arma::mat >::type Psi0(Psi0SEXP);
     Rcpp::traits::input_parameter< arma::vec >::type ID(IDSEXP);
     Rcpp::traits::input_parameter< arma::vec >::type Clusters(ClustersSEXP);
     Rcpp::traits::input_parameter< arma::vec >::type active(activeSEXP);
     Rcpp::traits::input_parameter< Function >::type flatten_gamma(flatten_gammaSEXP);
-    rcpp_result_gen = Rcpp::wrap(byproducts(num_obs, K, NSbj, C_star_sbj, gamma, X_sbj, beta, Z_sbj, L_sbj, Psi, Psi0, ID, Clusters, active, flatten_gamma));
+    rcpp_result_gen = Rcpp::wrap(byproducts(num_obs, K, NSbj, C_star_sbj, gamma, X_sbj, beta, Z_sbj, L_sbj, Psi, ID, Clusters, active, flatten_gamma));
     return rcpp_result_gen;
 END_RCPP
 }
 // KnotSelection
 List KnotSelection(int small_k, int NSbj, double tau, List C_star_sbj, NumericVector prsd_gamma, List Inv_middle, List X_sbj, arma::vec beta, List L_sbj, arma::vec ID, arma::vec Clusters);
-RcppExport SEXP _cvarpyp_KnotSelection(SEXP small_kSEXP, SEXP NSbjSEXP, SEXP tauSEXP, SEXP C_star_sbjSEXP, SEXP prsd_gammaSEXP, SEXP Inv_middleSEXP, SEXP X_sbjSEXP, SEXP betaSEXP, SEXP L_sbjSEXP, SEXP IDSEXP, SEXP ClustersSEXP) {
+RcppExport SEXP _fvcc_KnotSelection(SEXP small_kSEXP, SEXP NSbjSEXP, SEXP tauSEXP, SEXP C_star_sbjSEXP, SEXP prsd_gammaSEXP, SEXP Inv_middleSEXP, SEXP X_sbjSEXP, SEXP betaSEXP, SEXP L_sbjSEXP, SEXP IDSEXP, SEXP ClustersSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -53,8 +57,8 @@ BEGIN_RCPP
 END_RCPP
 }
 // MakeRk
-List MakeRk(int K, arma::vec tau, arma::vec active, List C_star_sbj, List inv_middle, List inv_middle0, List gamma, int NSbj, Function flatten_gamma);
-RcppExport SEXP _cvarpyp_MakeRk(SEXP KSEXP, SEXP tauSEXP, SEXP activeSEXP, SEXP C_star_sbjSEXP, SEXP inv_middleSEXP, SEXP inv_middle0SEXP, SEXP gammaSEXP, SEXP NSbjSEXP, SEXP flatten_gammaSEXP) {
+List MakeRk(int K, arma::vec tau, arma::vec active, List C_star_sbj, List gamma, int NSbj, Function flatten_gamma);
+RcppExport SEXP _fvcc_MakeRk(SEXP KSEXP, SEXP tauSEXP, SEXP activeSEXP, SEXP C_star_sbjSEXP, SEXP gammaSEXP, SEXP NSbjSEXP, SEXP flatten_gammaSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -62,18 +66,16 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< arma::vec >::type tau(tauSEXP);
     Rcpp::traits::input_parameter< arma::vec >::type active(activeSEXP);
     Rcpp::traits::input_parameter< List >::type C_star_sbj(C_star_sbjSEXP);
-    Rcpp::traits::input_parameter< List >::type inv_middle(inv_middleSEXP);
-    Rcpp::traits::input_parameter< List >::type inv_middle0(inv_middle0SEXP);
     Rcpp::traits::input_parameter< List >::type gamma(gammaSEXP);
     Rcpp::traits::input_parameter< int >::type NSbj(NSbjSEXP);
     Rcpp::traits::input_parameter< Function >::type flatten_gamma(flatten_gammaSEXP);
-    rcpp_result_gen = Rcpp::wrap(MakeRk(K, tau, active, C_star_sbj, inv_middle, inv_middle0, gamma, NSbj, flatten_gamma));
+    rcpp_result_gen = Rcpp::wrap(MakeRk(K, tau, active, C_star_sbj, gamma, NSbj, flatten_gamma));
     return rcpp_result_gen;
 END_RCPP
 }
 // sample_randomeffects
 List sample_randomeffects(int n, List Zi, List InvAdj, List Li, List C_star_sbj, List gamma, List X_sbj, arma::vec beta, arma::mat Psi, List theta_k, arma::vec Clusters, int r, Function flatten_gamma);
-RcppExport SEXP _cvarpyp_sample_randomeffects(SEXP nSEXP, SEXP ZiSEXP, SEXP InvAdjSEXP, SEXP LiSEXP, SEXP C_star_sbjSEXP, SEXP gammaSEXP, SEXP X_sbjSEXP, SEXP betaSEXP, SEXP PsiSEXP, SEXP theta_kSEXP, SEXP ClustersSEXP, SEXP rSEXP, SEXP flatten_gammaSEXP) {
+RcppExport SEXP _fvcc_sample_randomeffects(SEXP nSEXP, SEXP ZiSEXP, SEXP InvAdjSEXP, SEXP LiSEXP, SEXP C_star_sbjSEXP, SEXP gammaSEXP, SEXP X_sbjSEXP, SEXP betaSEXP, SEXP PsiSEXP, SEXP theta_kSEXP, SEXP ClustersSEXP, SEXP rSEXP, SEXP flatten_gammaSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -94,31 +96,9 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// MakeRkPsi
-List MakeRkPsi(List n_obs, int K, List Rk, arma::vec tau, arma::vec active, List C_star_sbj, List Z_sbj, arma::mat p_Psi, List gamma, List theta_k, int NSbj, Function flatten_gamma);
-RcppExport SEXP _cvarpyp_MakeRkPsi(SEXP n_obsSEXP, SEXP KSEXP, SEXP RkSEXP, SEXP tauSEXP, SEXP activeSEXP, SEXP C_star_sbjSEXP, SEXP Z_sbjSEXP, SEXP p_PsiSEXP, SEXP gammaSEXP, SEXP theta_kSEXP, SEXP NSbjSEXP, SEXP flatten_gammaSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< List >::type n_obs(n_obsSEXP);
-    Rcpp::traits::input_parameter< int >::type K(KSEXP);
-    Rcpp::traits::input_parameter< List >::type Rk(RkSEXP);
-    Rcpp::traits::input_parameter< arma::vec >::type tau(tauSEXP);
-    Rcpp::traits::input_parameter< arma::vec >::type active(activeSEXP);
-    Rcpp::traits::input_parameter< List >::type C_star_sbj(C_star_sbjSEXP);
-    Rcpp::traits::input_parameter< List >::type Z_sbj(Z_sbjSEXP);
-    Rcpp::traits::input_parameter< arma::mat >::type p_Psi(p_PsiSEXP);
-    Rcpp::traits::input_parameter< List >::type gamma(gammaSEXP);
-    Rcpp::traits::input_parameter< List >::type theta_k(theta_kSEXP);
-    Rcpp::traits::input_parameter< int >::type NSbj(NSbjSEXP);
-    Rcpp::traits::input_parameter< Function >::type flatten_gamma(flatten_gammaSEXP);
-    rcpp_result_gen = Rcpp::wrap(MakeRkPsi(n_obs, K, Rk, tau, active, C_star_sbj, Z_sbj, p_Psi, gamma, theta_k, NSbj, flatten_gamma));
-    return rcpp_result_gen;
-END_RCPP
-}
 // ObtainOutput
 List ObtainOutput(int NSbj, int K, arma::vec Diri_p, List L_sbj, List C_star_sbj, List X_sbj, arma::vec beta, List Z_sbj, List bi, List gamma, List theta_k, Function flatten_gamma);
-RcppExport SEXP _cvarpyp_ObtainOutput(SEXP NSbjSEXP, SEXP KSEXP, SEXP Diri_pSEXP, SEXP L_sbjSEXP, SEXP C_star_sbjSEXP, SEXP X_sbjSEXP, SEXP betaSEXP, SEXP Z_sbjSEXP, SEXP biSEXP, SEXP gammaSEXP, SEXP theta_kSEXP, SEXP flatten_gammaSEXP) {
+RcppExport SEXP _fvcc_ObtainOutput(SEXP NSbjSEXP, SEXP KSEXP, SEXP Diri_pSEXP, SEXP L_sbjSEXP, SEXP C_star_sbjSEXP, SEXP X_sbjSEXP, SEXP betaSEXP, SEXP Z_sbjSEXP, SEXP biSEXP, SEXP gammaSEXP, SEXP theta_kSEXP, SEXP flatten_gammaSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -140,16 +120,15 @@ END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
-    {"_cvarpyp_byproducts", (DL_FUNC) &_cvarpyp_byproducts, 15},
-    {"_cvarpyp_KnotSelection", (DL_FUNC) &_cvarpyp_KnotSelection, 11},
-    {"_cvarpyp_MakeRk", (DL_FUNC) &_cvarpyp_MakeRk, 9},
-    {"_cvarpyp_sample_randomeffects", (DL_FUNC) &_cvarpyp_sample_randomeffects, 13},
-    {"_cvarpyp_MakeRkPsi", (DL_FUNC) &_cvarpyp_MakeRkPsi, 12},
-    {"_cvarpyp_ObtainOutput", (DL_FUNC) &_cvarpyp_ObtainOutput, 12},
+    {"_fvcc_byproducts", (DL_FUNC) &_fvcc_byproducts, 14},
+    {"_fvcc_KnotSelection", (DL_FUNC) &_fvcc_KnotSelection, 11},
+    {"_fvcc_MakeRk", (DL_FUNC) &_fvcc_MakeRk, 7},
+    {"_fvcc_sample_randomeffects", (DL_FUNC) &_fvcc_sample_randomeffects, 13},
+    {"_fvcc_ObtainOutput", (DL_FUNC) &_fvcc_ObtainOutput, 12},
     {NULL, NULL, 0}
 };
 
-RcppExport void R_init_cvarpyp(DllInfo *dll) {
+RcppExport void R_init_fvcc(DllInfo *dll) {
     R_registerRoutines(dll, NULL, CallEntries, NULL, NULL);
     R_useDynamicSymbols(dll, FALSE);
 }

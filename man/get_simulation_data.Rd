@@ -4,14 +4,14 @@
 \alias{get_simulation_data}
 \title{Get simulation data}
 \usage{
-get_simulation_data(N, K, M, seed = 0)
+get_simulation_data(sbj1, sbj2, sbj3, seed = 0)
 }
 \arguments{
-\item{N}{The number of subjects}
+\item{sbj1}{The number of subjects of the first group}
 
-\item{K}{The number of clusters}
+\item{sbj2}{The number of subjects of the second group}
 
-\item{M}{The average number of observations}
+\item{sbj3}{The number of subjects of the third group}
 }
 \description{
 Get simulation data
