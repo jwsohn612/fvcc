@@ -1,11 +1,11 @@
-#' @useDynLib cvarpyp
+#' @useDynLib fvcc
 #' @importFrom Rcpp evalCpp
 #' @import dplyr
 #' @import purrr
 NULL
 
 .onUnload <- function (libpath) {
-  library.dynam.unload("cvarpyp", libpath)
+  library.dynam.unload("fvcc", libpath)
 }
 
 tol <- 1e-200
@@ -367,80 +367,6 @@ sample_gamma_unit <-
     }
     
   }
-
-
-sample_nu <-
-  function(current_nu,
-           lambda,
-           v,
-           sd_of_nu,
-           K.max,
-           nu_param) {
-    trans_current <- log(current_nu + lambda)
-    suggested <- rnorm(1, mean = trans_current, sd = sd_of_nu)
-    proposed_nu <- exp(suggested) - lambda
-    proposed <-
-      map_dbl(1:(K.max - 1), function(k)
-        dbeta(v[k], 1 - lambda, proposed_nu + k * lambda, log = T)) %>% reduce(`+`)  - nu_param *
-      proposed_nu + suggested
-    current <-
-      map_dbl(1:(K.max - 1), function(k)
-        dbeta(v[k], 1 - lambda, current_nu + k * lambda, log = T)) %>% reduce(`+`) - nu_param *
-      current_nu  + trans_current
-    prob <- exp(proposed - current)
-    if (prob >= 1) {
-      return(proposed_nu)
-    } else{
-      u <- runif(1)
-      if (u <= prob) {
-        return(proposed_nu)
-      } else{
-        return(current_nu)
-      }
-    }
-  }
-
-sample_lambda <-
-  function(current_lambda, nu, v, K.max, sd_of_lambda) {
-    if (nu > 0) {
-      trans_lambda <- log(current_lambda / (1 - current_lambda))
-      suggested <- rnorm(1, mean = trans_lambda, sd = sd_of_lambda)
-      proposed_lambda <- 1 / (1 + exp(-suggested))
-      log_jacobian_current <-
-        -trans_lambda - 2 * log(1 + exp(-trans_lambda))
-      log_jacobian_proposed <- -suggested - 2 * log(1 + exp(-suggested))
-    } else{
-      delta <- (current_lambda + nu) / (1 + nu)
-      trans_lambda <- log(delta / (1 - delta))
-      suggested <- rnorm(1, mean = trans_lambda, sd = sd_of_lambda)
-      newly_delta <- 1 / (1 + exp(-suggested))
-      proposed_lambda <- (1 + nu) * newly_delta - nu
-      
-      log_jacobian_current <-
-        -trans_lambda - 2 * log(1 + exp(-trans_lambda))   # log(1+nu)?? ?????? ?????? ????.
-      log_jacobian_proposed <- -suggested - 2 * log(1 + exp(-suggested))
-    }
-    proposed <-
-      map_dbl(1:(K.max - 1), function(k)
-        dbeta(v[k], 1 - proposed_lambda, nu + k * proposed_lambda, log = T)) %>% reduce(`+`) - proposed_lambda  + log_jacobian_proposed
-    current <-
-      map_dbl(1:(K.max - 1), function(k)
-        dbeta(v[k], 1 - current_lambda, nu + k * current_lambda, log = T)) %>% reduce(`+`) - current_lambda +
-      log_jacobian_current
-    
-    prob <- exp(proposed - current)
-    if (prob >= 1) {
-      return(proposed_lambda)
-    } else{
-      u <- runif(1)
-      if (u <= prob) {
-        return(proposed_lambda)
-      } else{
-        return(current_lambda)
-      }
-    }
-  }
-
 
 for_theta <- function(num_k, active, XXi_k, Xi_k, Rk, tau) {
   if (num_k %in% active) {

@@ -12,12 +12,11 @@ NULL
 #' @param Z A part of design matrix for random effects
 #' @param t A vector of time observations
 #' @param Y A vector of binary responses
-#' @param num_knots The number of knots for the basis splines
+#' @param num_knots The number of knot candidates for the basis splines
 #' @param K_max The upper bound of the number of clusters for the stick-breaking process
 #' @param num_iters The number of iterations for the partially collapsed Gibbs sampler
 #' @param thinning_unit Thinning unit of the pcg sampler
-#' @param nu An initial value of the concentration parameter
-#' @param lambda An initial value of the discount parameter
+#' @param nu The concentration parameter
 #' @param Psi An initial covariance matrix of the random effects
 #' @param beta An initial vector of the fixed effects
 #'
@@ -52,23 +51,20 @@ NULL
 #' plot(output$lambda)
 #'
 #' @export
-fcvarpyp <- function(ID,
+fvcc <- function(ID,
                      W,
                      X = NULL,
                      Z,
                      t,
                      Y,
-                     num_knots = 10,
+                     num_knots = 30,
                      K_max,
                      num_iters = 10000,
                      thinning_unit = 5,
                      nu = 1,
-                     lambda = 0.5,
                      Psi = NULL,
                      beta = NULL,
-                     kappa = 10,
-                     stick_act = c(1, 10),
-                     stick_nact = c(1, 10)) {
+                     kappa = 1000) {
   temp <- preprocess_data(ID, W, X, Z, t, Y)
   ID <- temp$ID
   W <- temp$W
@@ -96,13 +92,9 @@ fcvarpyp <- function(ID,
   lower.tn <- log(Y)
   upper.tn <- -log(1 - Y)
   
-  sd_nu <- 0.5
-  sd_lambda <- 0.5
-  
   a_pi <- 1
   b_pi <- 1  # noninformative
-  nu_param <- 1
-  
+
   # rinvGamma
   g_k <- 1/2
   h_k <- NSbj/2
@@ -139,13 +131,9 @@ fcvarpyp <- function(ID,
     }
   }
   
-  
-  Psi_0 <- diag(r)
-  
   if (is.null(beta)) {
     beta <- rnorm(q, sd = 1 / sqrt(q))
   }
-  
   
   bi <- map(1:NSbj, ~ MASS::mvrnorm(1, mu = rep(0, r), Sigma = Psi))
   Li <-
@@ -158,7 +146,7 @@ fcvarpyp <- function(ID,
   L_sbj <- split(Li, f = ID)
   
   pu <- r
-  D <- diag(r)
+  D <- 10^-10*diag(r)	
   
   g_vec <- rep(g_k, K_max)
   h_vec <- rep(h_k, K_max)
@@ -214,7 +202,6 @@ fcvarpyp <- function(ID,
       Z_sbj,
       L_sbj,
       Psi,
-      Psi_0,
       ID - 1,
       Clusters,
       active,
@@ -230,8 +217,6 @@ fcvarpyp <- function(ID,
            tau,
            active,
            C_star_sbj,
-           InvAdj,
-           InvAdj_0,
            gamma,
            NSbj,
            flatten_gamma = flatten_gamma_with_fixC)
@@ -243,8 +228,6 @@ fcvarpyp <- function(ID,
   updated_cluster <- list()
   updated_tau <- list()
   updated_Psi <- list()
-  updated_nu <- c()
-  updated_lambda <- c()
   
   update_indi <- 1
   
@@ -288,30 +271,12 @@ fcvarpyp <- function(ID,
         1:(K_max - 1),
         ~ rbeta(
           1,
-          1 - lambda + num_of_ones_K_sbjs[.x],
-          nu + .x * lambda + sum(num_of_ones_K_sbjs[(.x + 1):K_max])
+          1 - num_of_ones_K_sbjs[.x],
+          nu + sum(num_of_ones_K_sbjs[(.x + 1):K_max])
         )
       ) , 1)
     Diri_p <- get_DP_pi(v, K_max)
     
-    # Draw nu
-    tryCatch({
-      nu <- sample_nu(nu, lambda, v, sd_nu, K_max, nu_param)
-    }, error = function(e) {
-      nu <- tolerance::r2exp(n = 1,
-                             rate = 1,
-                             shift = -lambda)
-      
-    })
-    
-    # Draw lambda
-    lambda <- tryCatch({
-      lambda <- sample_lambda(lambda, nu, v, K_max, sd_lambda)
-    }, error = function(e) {
-      while (nu <= -lambda) {
-        lambda <- runif(1)
-      }
-    })
     
     temp <-
       byproducts(
@@ -325,7 +290,6 @@ fcvarpyp <- function(ID,
         Z_sbj,
         L_sbj,
         Psi,
-        Psi_0,
         ID - 1,
         Clusters,
         active,
@@ -341,16 +305,13 @@ fcvarpyp <- function(ID,
              tau,
              active,
              C_star_sbj,
-             InvAdj,
-             InvAdj_0,
              gamma,
              NSbj,
              flatten_gamma = flatten_gamma_with_fixC)
     Rk <- temp[[1]]
     
     C_star_sbj_k <-
-      map(1:NSbj, ~ C_star_sbj[[.x]][, which(flatten_gamma_with_fixC(gamma[[Clusters[.x]]]) ==
-                                               TRUE)])
+      map(1:NSbj, ~ C_star_sbj[[.x]][, which(flatten_gamma_with_fixC(gamma[[Clusters[.x]]]) == TRUE)])
     
     # Draw theta
     theta_k <- sample_theta(K_max, active, XXi_k, Xi_k, Rk, tau)
@@ -367,8 +328,7 @@ fcvarpyp <- function(ID,
               ~ MCMCpack::rinvgamma(
                 1,
                 shape = (num_of_ones_vars[.x] + g_vec[.x]) / 2,
-                scale = h_vec[.x] / 2 + (theta_k[[.x]] %*% Rk[[.x]] %*% theta_k[[.x]]) /
-                  2
+                scale = h_vec[.x] / 2 + (theta_k[[.x]] %*% Rk[[.x]] %*% theta_k[[.x]]) / 2
               ))
     
     # Draw bi
@@ -392,27 +352,8 @@ fcvarpyp <- function(ID,
     bi_mats <- temp[[2]]
     
     # Draw Psi
-    proposed_Psi <- MCMCpack::riwish(pu + NSbj, D + bi_mats)
-    probs_Psi <-
-      MakeRkPsi(
-        num_obs_per_sbj,
-        K_max,
-        Rk,
-        tau,
-        active,
-        C_star_sbj,
-        Z_sbj,
-        proposed_Psi,
-        gamma,
-        theta_k,
-        NSbj,
-        flatten_gamma = flatten_gamma_with_fixC
-      )
-    if (runif(1) < sum(unlist(probs_Psi[[1]])))
-      Psi <- proposed_Psi
-    
-    Psi_0 <- Psi
-    
+    Psi <- MCMCpack::riwish(pu + NSbj, D + bi_mats)
+
     # Draw Li
     L_sbj <-
       sample_L(ID,
@@ -468,8 +409,6 @@ fcvarpyp <- function(ID,
       updated_theta <- rlist::list.append(updated_theta, theta_k)
       updated_tau <- rlist::list.append(updated_tau, tau)
       updated_Psi <- rlist::list.append(updated_Psi, Psi)
-      updated_lambda <- append(updated_lambda, lambda)
-      updated_nu <- append(updated_nu, nu)
       
       if (!is.null(X))
         updated_beta <- rlist::list.append(updated_beta, beta)
@@ -494,8 +433,6 @@ fcvarpyp <- function(ID,
   class(updated_tau) <- 'dispersion'
   class(updated_Psi) <- 'random_effect'
   class(updated_beta) <- 'fixed_effect'
-  class(updated_lambda) <- 'lambda'
-  class(updated_nu) <- 'nu'
   
   list(
     latent_location = updated_gamma,
@@ -505,8 +442,6 @@ fcvarpyp <- function(ID,
     fixed_effect = updated_beta,
     dispersion = updated_tau,
     knot_position = knot_position,
-    nu = updated_nu,
-    lambda = updated_lambda,
     time_range = c(min(t), max(t)),
     p = p,
     q = ifelse(!is.null(X), dim(X)[2], 0),

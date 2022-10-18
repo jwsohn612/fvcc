@@ -1,4 +1,4 @@
-library(cvarpyp)
+library(fvcc)
 
 ID <- SimulationData$ID
 W <- SimulationData[c('W1', 'W2')]
@@ -14,7 +14,7 @@ output <- cvarpyp(
   Z = Z,
   t = t,
   Y = Y,
-  num_knots = 15,
+  num_knots = 30,
   K_max = 10,
   num_iters = 10000
 )
@@ -36,5 +36,4 @@ plot(
   time_range = output$time_range,
   knot_position = output$knot_position
 )
-plot(output$nu)
-plot(output$lambda)
+

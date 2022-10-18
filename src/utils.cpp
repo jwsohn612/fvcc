@@ -4,10 +4,9 @@
 using namespace Rcpp;
 
 // [[Rcpp::export()]]
-List byproducts(arma::vec num_obs, int K, int NSbj, List C_star_sbj, List gamma, List X_sbj, arma::vec beta, List Z_sbj, List L_sbj, arma::mat Psi, arma::mat Psi0, arma::vec ID, arma::vec Clusters, arma::vec active, Function flatten_gamma){
+List byproducts(arma::vec num_obs, int K, int NSbj, List C_star_sbj, List gamma, List X_sbj, arma::vec beta, List Z_sbj, List L_sbj, arma::mat Psi, arma::vec ID, arma::vec Clusters, arma::vec active, Function flatten_gamma){
   
   List IU(NSbj);
-  List IU0(NSbj);
   List XXi_sbj(NSbj);
   List Xi_sbj(NSbj);
   
@@ -18,10 +17,8 @@ List byproducts(arma::vec num_obs, int K, int NSbj, List C_star_sbj, List gamma,
     arma::mat C_star_sbj_temp_sel = C_star_sbj_temp.cols(arma::find(as<arma::fvec>(indZ)>0.5));
     
     arma::mat Inv_middle_temp = inv_sympd(arma::eye(num_obs[i],num_obs[i])+as<arma::mat>(Z_sbj[i])*Psi*trans(as<arma::mat>(Z_sbj[i])));
-    arma::mat Inv_middle_temp0 = inv_sympd(arma::eye(num_obs[i],num_obs[i])+as<arma::mat>(Z_sbj[i])*Psi0*trans(as<arma::mat>(Z_sbj[i])));
     
     IU[i] = Inv_middle_temp;
-    IU0[i] = Inv_middle_temp0;
     
     arma::mat common_temp = trans(C_star_sbj_temp_sel) * Inv_middle_temp;
     arma::mat temp1 = common_temp * C_star_sbj_temp_sel;
@@ -37,13 +34,10 @@ List byproducts(arma::vec num_obs, int K, int NSbj, List C_star_sbj, List gamma,
   for(int k=0 ; k<K ; k++){
     if(std::find(active.begin(),active.end(),(k+1)) != active.end()){
       arma::uvec pos_k = find((Clusters-1)==k);
-      
       int mat_size = as<arma::mat>(XXi_sbj[pos_k[0]]).n_cols;
-      int pos_size = pos_k.size();
-      
       arma::mat XXi_sum_temp = arma::zeros(mat_size, mat_size);
       arma::mat Xi_sum_temp = arma::zeros(mat_size, 1);
-      for(int l=0 ; l < pos_size ; l++){
+      for(int l=0 ; l<pos_k.size() ; l++){
         XXi_sum_temp += as<arma::mat>(XXi_sbj[pos_k[l]]);
         Xi_sum_temp += as<arma::vec>(Xi_sbj[pos_k[l]]);
       }
@@ -56,13 +50,13 @@ List byproducts(arma::vec num_obs, int K, int NSbj, List C_star_sbj, List gamma,
     
   }
   
-  return( List::create(IU, IU0, XXi_sum, Xi_sum) );
+  return( List::create(IU, XXi_sum, Xi_sum) );
   
 }
 
 // [[Rcpp::export()]] 
 List KnotSelection(int small_k, int NSbj, double tau, List C_star_sbj, NumericVector prsd_gamma, List Inv_middle, List X_sbj, arma::vec beta, List L_sbj, arma::vec ID, arma::vec Clusters){
-
+  
   NumericVector indZ = prsd_gamma;
   List XXi_sbj(NSbj);
   List Xi_sbj(NSbj);
@@ -84,12 +78,10 @@ List KnotSelection(int small_k, int NSbj, double tau, List C_star_sbj, NumericVe
   
   arma::uvec pos_k = find(Clusters==small_k);
   int mat_size = as<arma::mat>(XXi_sbj[pos_k[0]]).n_cols;
-  int pos_size = pos_k.size();
-  
   arma::mat XXi_sum_temp = arma::zeros(mat_size, mat_size);
   arma::mat Xi_sum_temp = arma::zeros(mat_size, 1);
   
-  for(int l=0 ; l<pos_size ; l++){
+  for(int l=0 ; l<pos_k.size() ; l++){
     XXi_sum_temp += as<arma::mat>(XXi_sbj[pos_k[l]]);
     Xi_sum_temp += as<arma::vec>(Xi_sbj[pos_k[l]]);
   }
@@ -104,13 +96,13 @@ List KnotSelection(int small_k, int NSbj, double tau, List C_star_sbj, NumericVe
   arma::mat first_part = 0.5*trans(Xi_sum_temp)*inv_sympd((trans(temp_in2)+temp_in2)/2)*Xi_sum_temp;
   double second_part = (-0.5)*val;
   out_val = first_part + second_part;       
-
-return( List::create(out_val) );
-
+  
+  return( List::create(out_val) );
+  
 }
 
 // [[Rcpp::export()]]
-List MakeRk(int K, arma::vec tau, arma::vec active, List C_star_sbj, List inv_middle, List inv_middle0, List gamma, int NSbj, Function flatten_gamma){
+List MakeRk(int K, arma::vec tau, arma::vec active, List C_star_sbj,  List gamma, int NSbj, Function flatten_gamma){
   List Rk(K);
   List Inv_Phi_k(K);
   List Inv_XXi_k(K);
@@ -120,21 +112,11 @@ List MakeRk(int K, arma::vec tau, arma::vec active, List C_star_sbj, List inv_mi
     NumericVector indZ = flatten_gamma(gamma[k]);
     arma::mat sumXUX_total = arma::zeros(sum(indZ),sum(indZ));
     
-    if(std::find(active.begin(),active.end(),(k+1)) != active.end()){
+    for(int i=0 ; i<NSbj ; i++){
+      arma::mat C_star_sbj_temp = as<arma::mat>(C_star_sbj[i]);
+      arma::mat C_star_sbj_temp_sel = C_star_sbj_temp.cols(arma::find(as<arma::fvec>(indZ)>0.5));
+      sumXUX_total += trans(C_star_sbj_temp_sel)*C_star_sbj_temp_sel;
       
-      for(int i=0 ; i<NSbj ; i++){
-        arma::mat C_star_sbj_temp = as<arma::mat>(C_star_sbj[i]);
-        arma::mat C_star_sbj_temp_sel = C_star_sbj_temp.cols(arma::find(as<arma::fvec>(indZ)>0.5));
-        sumXUX_total += trans(C_star_sbj_temp_sel)*as<arma::mat>(inv_middle[i])*C_star_sbj_temp_sel;
-        
-      }
-      
-    }else{
-      for(int i=0 ; i<NSbj ; i++){
-        arma::mat C_star_sbj_temp = as<arma::mat>(C_star_sbj[i]);
-        arma::mat C_star_sbj_temp_sel = C_star_sbj_temp.cols(arma::find(as<arma::fvec>(indZ)>0.5));
-        sumXUX_total += trans(C_star_sbj_temp_sel)*as<arma::mat>(inv_middle0[i])*C_star_sbj_temp_sel;
-      }
     }
     Rk[k] = sumXUX_total;
   }
@@ -169,49 +151,6 @@ List sample_randomeffects(int n, List Zi, List InvAdj, List Li, List C_star_sbj,
     
   }
   return List::create(listb,btb);
-}
-
-// [[Rcpp::export()]]
-List MakeRkPsi(List n_obs, int K, List Rk, arma::vec tau, arma::vec active, List C_star_sbj, List Z_sbj, arma::mat p_Psi, List gamma, List theta_k, int NSbj, Function flatten_gamma){
-  List p_Rk(K);
-  List log_psi_value(K);
-  
-  for(int k=0 ; k<K ; k++){
-    
-    NumericVector indZ = flatten_gamma(gamma[k]);
-    arma::mat sumXUX_total = arma::zeros(sum(indZ),sum(indZ));
-    arma::vec fixE = as<arma::vec>(theta_k[k]);
-    if(std::find(active.begin(),active.end(),(k+1)) != active.end()){
-      
-      for(int i=0 ; i<NSbj ; i++){
-        arma::mat temp_Mat = arma::eye(n_obs[i],n_obs[i])+as<arma::mat>(Z_sbj[i])*p_Psi*trans(as<arma::mat>(Z_sbj[i]));
-        arma::mat IU = inv_sympd((trans(temp_Mat)+temp_Mat)/2);
-        arma::mat C_star_sbj_temp = as<arma::mat>(C_star_sbj[i]);
-        arma::mat C_star_sbj_temp_sel = C_star_sbj_temp.cols(arma::find(as<arma::fvec>(indZ)>0.5));
-        sumXUX_total += trans(C_star_sbj_temp_sel)*IU*C_star_sbj_temp_sel;
-      }
-      
-      arma::mat p_cov_mat = tau[k] * inv_sympd((trans(sumXUX_total)+sumXUX_total)/2);
-      arma::mat c_cov_mat = tau[k] * inv_sympd((trans(as<arma::mat>(Rk[k]))+as<arma::mat>(Rk[k]))/2);
-      
-      double p_val;
-      double p_sign;
-      double c_val;
-      double c_sign;
-      
-      log_det(p_val, p_sign, p_cov_mat);
-      log_det(c_val, c_sign, c_cov_mat);
-      
-      log_psi_value[k] =  exp( (0.5*p_val-0.5*trans(fixE)*sumXUX_total*fixE) - (0.5*c_val-0.5*trans(fixE)*as<arma::mat>(Rk[k])*fixE) );
-      
-      
-    }else{
-      sumXUX_total += 0;
-      log_psi_value[k] = 0;
-    }
-    
-  }
-  return(List::create(log_psi_value));
 }
 
 // [[Rcpp::export()]]
