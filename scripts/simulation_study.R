@@ -7,7 +7,7 @@ Z <- SimulationData[c('Z1', 'Z2')]
 t <- SimulationData$t
 Y <- SimulationData$Y
 
-output <- cvarpyp(
+output <- fvcc(
   ID = ID,
   W = W,
   X = X,
