@@ -208,9 +208,8 @@ fvcc <- function(ID,
       flatten_gamma = flatten_gamma_with_fixC
     )
   InvAdj <- temp[[1]]
-  InvAdj_0 <- temp[[2]]
-  XXi_k <- temp[[3]]
-  Xi_k <- temp[[4]]
+  XXi_k <- temp[[2]]
+  Xi_k <- temp[[3]]
   
   temp <-
     MakeRk(K_max,
@@ -266,15 +265,8 @@ fvcc <- function(ID,
     
     # Draw stick breaking beta
     num_of_ones_K_sbjs <- get_sbj_clusters(K_max, Clusters)
-    v <-
-      c(map_dbl(
-        1:(K_max - 1),
-        ~ rbeta(
-          1,
-          1 - num_of_ones_K_sbjs[.x],
-          nu + sum(num_of_ones_K_sbjs[(.x + 1):K_max])
-        )
-      ) , 1)
+    
+    v <-  c(sapply(1:(K_max-1), function(k) rbeta(1, 1 + num_of_ones_K_sbjs[k], nu+sum(num_of_ones_K_sbjs[(k+1):K_max]))),1)
     Diri_p <- get_DP_pi(v, K_max)
     
     
@@ -296,9 +288,8 @@ fvcc <- function(ID,
         flatten_gamma = flatten_gamma_with_fixC
       )
     InvAdj <- temp[[1]]
-    InvAdj_0 <- temp[[2]]
-    XXi_k <- temp[[3]]
-    Xi_k <- temp[[4]]
+    XXi_k <- temp[[2]]
+    Xi_k <- temp[[3]]
     
     temp <-
       MakeRk(K_max,
