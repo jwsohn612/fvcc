@@ -16,4 +16,4 @@ devtools::install_github("jwsohn612/fvcc")
 
 
 ### Simulation Study 
-   - Simulation study in Section 4.2 can be implemented via simulation_study.r in the script folder. 
+   - Section 4.2 can be implemented via simulation_study.R in the **scripts** folder. 
