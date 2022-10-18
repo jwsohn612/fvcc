@@ -21,7 +21,7 @@ NULL
 #' @param beta An initial vector of the fixed effects
 #'
 #' @examples
-#' library(cvarpyp)
+#' library(fvcc)
 #'
 #' #SimulationData is an example dataset.
 #'
