@@ -60,8 +60,6 @@ get_gelman_score <- function(output_list){
 mcmc_output <- get_gelman_score(list(output1, output2, output3))
 gelman.diag(mcmc_output)
 
-output <- output1
-
 routput1 <- fvcc::relabel_chain(output1)
 routput2 <- fvcc::relabel_chain(output2)
 routput3 <- fvcc::relabel_chain(output3)
