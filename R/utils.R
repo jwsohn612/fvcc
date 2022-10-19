@@ -537,3 +537,4 @@ get_post_summary_vc <-
     list(vc_summary = vc_summary,
          time_domain = time_domain)
   }
+

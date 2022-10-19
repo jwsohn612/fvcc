@@ -233,3 +233,81 @@ plot.lambda <- function(lambda_sample, burn = NULL) {
         line = 2.3,
         cex = 0.9)
 }
+
+init_prog_var <- function(n_iter){
+  pb <- txtProgressBar(min = 0,      
+                       max = n_iter, 
+                       style = 3,    
+                       width = 50,   
+                       char = "=")   
+}
+
+#' @export
+get_vc_results <- function(save_dir, sbj1, sbj2, sbj3){
+  
+  rdata_list <- list.files(save_dir)
+  replicates <- length(rdata_list)
+  
+  pb <- init_prog_var(replicates)
+  
+  varying_coefs_list <- list()
+  knot_selection_list <- list()
+  cluster_list <- list()
+  
+  for(i in 1:length(rdata_list)){
+    
+    output <- rlist::list.load(paste0(save_dir, rdata_list[i]))
+    saved_sequence_size <- length(output$cluster)
+    
+    p <- output$p
+    K <- output$K_max
+    
+    vc <- output$varying_coefficient$vc_summary
+    
+    # Relabeling Cluster
+    cluster_matrix <- do.call(rbind, output$cluster)
+    cluster <- unlist(apply(cluster_matrix, 2,function(x) DescTools::Mode(x)[1]))
+    
+    es_label1 <- as.numeric(names(which.max(table(cluster[1:sbj1]))))
+    es_label2 <- as.numeric(names(which.max(table(cluster[(sbj1+1):(sbj1+sbj2)]))))
+    es_label3 <- as.numeric(names(which.max(table(cluster[(sbj1+sbj2+1):(sbj1+sbj2+sbj3)]))))
+    
+    trivial_cluster <- sort(unique(cluster[!(cluster == es_label1 | cluster == es_label2 | cluster == es_label3)]))
+    
+    if(is.null(trivial_cluster)){
+      es_label <- unique(c(es_label1, es_label2, es_label3))
+    }else{
+      es_label <- unique(c(es_label1, es_label2, es_label3, trivial_cluster))
+    }
+    
+    true_label <- 1:length(es_label)
+    new_label <- sapply(cluster, function(x) true_label[es_label==x]) %>% as.vector()
+    table(new_label, cluster)
+    names(es_label) <- true_label
+    
+    cluster_list[[i]] <- new_label
+    
+    get_cluster_number <- function(x) es_label[names(es_label)==x]
+    
+    varying_coefs <- purrr::map(1:K, function(k){
+      purrr::map(1:p, function(l){
+        varing_coefs_each_covariate <- purrr::map(vc[[k]], ~ .x[,l])
+        do.call(rbind, varing_coefs_each_covariate)
+      })
+    })
+    
+    
+    # Summarize
+    # Varying Coefficients
+    varying_coefs_list[[i]] <- list(varying_coefs[get_cluster_number(1)],
+                                    varying_coefs[get_cluster_number(2)],
+                                    varying_coefs[get_cluster_number(3)])
+    
+    setTxtProgressBar(pb, i)
+  }
+  
+  list(varying_coefs_list = varying_coefs_list, 
+       cluster_list = cluster_list
+  )
+}
+

@@ -433,6 +433,7 @@ fvcc <- function(ID,
     dispersion = updated_tau,
     knot_position = knot_position,
     time_range = c(min(t), max(t)),
+    K_max = K_max, 
     p = p,
     q = ifelse(!is.null(X), dim(X)[2], 0),
     r = r
