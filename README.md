@@ -25,7 +25,9 @@ devtools::install_github("jwsohn612/fvcc")
 - 2. Then, run **make_overlapping_varying_coefs.R** 
 
 #### Figure 3&4 
-- 1. Run **make_replicates.R** with different configuration, such as $\nu=0.1$, $\nu=1$, or $\nu = 10$. 
+- 1. Run **make_replicates.R** with different configuration, such as $\nu=0.1$, $\nu=1$, or $\nu = 10$; or different number of subjects across the three groups.
+- 2. Run **calculate_evaluation_metrics.R**.
+
 
 
 
