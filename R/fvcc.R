@@ -64,7 +64,9 @@ fvcc <- function(ID,
                      nu = 1,
                      Psi = NULL,
                      beta = NULL,
-                     kappa = 1000) {
+                     kappa = 1000,
+                     return_var_coefs = TRUE
+                 ) {
   temp <- preprocess_data(ID, W, X, Z, t, Y)
   ID <- temp$ID
   W <- temp$W
@@ -423,19 +425,39 @@ fvcc <- function(ID,
   class(updated_tau) <- 'dispersion'
   class(updated_Psi) <- 'random_effect'
   class(updated_beta) <- 'fixed_effect'
+  if(return_var_coefs == TRUE){
+    list(
+      latent_location = updated_gamma,
+      cluster = updated_cluster,
+      varying_coefficient = varying_coefficient,
+      random_effect = updated_Psi,
+      fixed_effect = updated_beta,
+      dispersion = updated_tau,
+      knot_position = knot_position,
+      time_range = c(min(t), max(t)),
+      K_max = K_max, 
+      p = p,
+      q = ifelse(!is.null(X), dim(X)[2], 0),
+      r = r, 
+      sd_scaler = sd(t)
+    )
+  }else{
+    list(
+      latent_location = updated_gamma,
+      cluster = updated_cluster,
+      gamma = updated_gamma,
+      theta = updated_theta,
+      random_effect = updated_Psi,
+      fixed_effect = updated_beta,
+      dispersion = updated_tau,
+      knot_position = knot_position,
+      time_range = c(min(t), max(t)),
+      K_max = K_max, 
+      p = p,
+      q = ifelse(!is.null(X), dim(X)[2], 0),
+      r = r, 
+      sd_scaler = sd(t)
+    )
+  }
   
-  list(
-    latent_location = updated_gamma,
-    cluster = updated_cluster,
-    varying_coefficient = varying_coefficient,
-    random_effect = updated_Psi,
-    fixed_effect = updated_beta,
-    dispersion = updated_tau,
-    knot_position = knot_position,
-    time_range = c(min(t), max(t)),
-    K_max = K_max, 
-    p = p,
-    q = ifelse(!is.null(X), dim(X)[2], 0),
-    r = r
-  )
 }

@@ -2,6 +2,7 @@
 #' @import rlist
 #' @import progress
 #' @import purrr
+#' @import label.switching
 NULL
 
 #' Draw the posterior results of random effects
@@ -310,4 +311,130 @@ get_vc_results <- function(save_dir, sbj1, sbj2, sbj3){
        cluster_list = cluster_list
   )
 }
+
+get_main_clusters <- function(cluster){
+  
+  Cluster_matrix = do.call(rbind, cluster)
+  cclusters <- unlist(apply(Cluster_matrix,2,function(x) DescTools::Mode(x)[1]))
+  
+  active <- names(table(cclusters))
+  num_sbjs_active <- table(cclusters)[active]
+  active <- as.numeric(active)
+  
+  cclusters
+}
+
+#' @export
+relabel_chain <- function(output){
+  
+  cluster <- output$cluster
+  gamma <- output$gamma
+  theta <- output$theta
+  
+  K <- length(theta[[1]])
+  z <- do.call(rbind, cluster) 
+  
+  run <- label.switching::ecr.iterative.1(z = z, K = K)
+  map <- run$permutations
+  
+  agamma <- purrr::map(1:nrow(map), function(i){
+    gamma[[i]][map[i,]]
+  })
+  
+  atheta <- purrr::map(1:nrow(map), function(i){
+    theta[[i]][map[i,]]
+  })
+  
+  acluster <- purrr::map(1:nrow(map), function(i){
+    map[i,][cluster[[i]]]
+  })
+  
+  return(list(gamma = agamma, 
+              theta = atheta, 
+              cluster = acluster,
+              knots = output$knot_position,
+              sdd = output$sd_scaler))
+}
+
+#' @export
+make_vc_outputs_on_knots <- function(output){
+  "
+  All parameters should be burn in advance. 
+  "
+  gamma <- output$gamma
+  theta <- output$theta
+  cluster <- output$cluster
+  
+  K <- gamma[[1]] %>% length
+  knots <- output$knots
+  sdd <- output$sdd
+  
+  BasisFunctionsSets_onKnots <- purrr::map(knots, function(t) B(t, knots, sd = sdd))
+  
+  # In our example, the clustering order is consistent in accordance with the shape of varying coefficients.
+  m_clusters <- get_main_clusters(cluster) 
+  top2cls <- sort(table(m_clusters), decreasing = TRUE)[1:2]
+  len <- gamma %>% length
+  print(top2cls)
+  
+  outputs <- 
+    purrr::map(names(top2cls) %>% as.numeric, function(k){
+      each_K <- purrr::map(1:len, function(iter){
+        along_time <- purrr::map(1:length(knots), function(t) {
+          
+          # Taking phis
+          temp_gamma <- t(gamma[[iter]][[k]])
+          temp_gamma[temp_gamma==1] <- theta[[iter]][[k]]
+          
+          # Taking Basis functions
+          Btemp_gamma <- gamma[[iter]][[k]]
+          Btemp_gamma[1,][Btemp_gamma[1, ]==1] <- BasisFunctionsSets_onKnots[[t]][gamma[[iter]][[k]][1,]==1]
+          Btemp_gamma[2,][Btemp_gamma[2, ]==1] <- BasisFunctionsSets_onKnots[[t]][gamma[[iter]][[k]][2,]==1]
+          
+          diag(Btemp_gamma %*% temp_gamma)
+        }) 
+        do.call(rbind, along_time)
+      }) 
+      
+      each_K <- list(
+        do.call(rbind,purrr::map(each_K, function(mat) mat[,1])),
+        do.call(rbind,purrr::map(each_K, function(mat) mat[,2]))
+      )
+    })
+  
+  graphics.off()
+  par(mfrow=c(2,2),cex=0.5)
+  drawing_varying_plots(outputs, cluster = 1, predictor = 1, cls_name = 1, timedomain = knots)
+  drawing_varying_plots(outputs, cluster = 2, predictor = 1, cls_name = 2, timedomain = knots)
+  drawing_varying_plots(outputs, cluster = 1, predictor = 2, cls_name = 1, timedomain = knots)
+  drawing_varying_plots(outputs, cluster = 2, predictor = 2, cls_name = 2, timedomain = knots)
+  return(outputs) 
+}
+
+
+drawing_varying_plots <- function(outputs, cluster, predictor, cls_name, y_range=NULL, timedomain){
+  
+  poly_range <- c(timedomain, rev(timedomain))
+  varrr <- outputs[[cluster]][[predictor]] 
+  
+  med <- apply(varrr, 2, function(x) quantile(x, 0.5))
+  lower <- apply(varrr, 2, function(x) quantile(x, 0.025))
+  upper <- apply(varrr, 2, function(x) quantile(x, 0.975))
+  
+  poly_coef_UL <- c(lower, rev(upper))
+  if(is.null(y_range)){
+    plot(NULL,type="l",ylim=c(min(varrr),max(varrr)),xlim=range(timedomain), xlab="",ylab="")  
+  }
+  else{
+    plot(NULL,type="l",xlim=range(timedomain), ylim=y_range, xlab="",ylab="")
+  }
+  polygon(poly_range, poly_coef_UL,col=gray(0:9/9)[8],border=F)
+  lines(timedomain,med,lty=1)
+  abline(h=0,lty=2)
+  
+  mtext(paste0('v',cls_name,predictor),side=2,line=2.8,cex=0.9)
+  mtext("t",side=1,line=2.8,cex=0.9)
+  
+}
+
 

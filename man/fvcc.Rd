@@ -18,7 +18,8 @@ fvcc(
   nu = 1,
   Psi = NULL,
   beta = NULL,
-  kappa = 1000
+  kappa = 1000,
+  return_var_coefs = TRUE
 )
 }
 \arguments{

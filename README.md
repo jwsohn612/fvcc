@@ -29,6 +29,9 @@ devtools::install_github("jwsohn612/fvcc")
 - 2. Run **calculate_evaluation_metrics.R**.
 
 
+### Real Data Analysis
 
+#### Figure 6&7&8 are based on the following code script
+- 1. Run **run_multiple_chains_real.R** 
 
 
