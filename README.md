@@ -18,7 +18,7 @@ devtools::install_github("jwsohn612/fvcc")
 ### Simulation Study 
 
 #### Figure 2
-- Section 4.2 can be implemented via simulation_study.R in the **scripts** folder. 
+- Run simulation_study.R in the **scripts** folder. 
 
 #### Figure 5
 - 1. Run **make_replicates.R** in the **scripts** folder. 

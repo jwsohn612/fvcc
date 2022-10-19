@@ -132,7 +132,7 @@ fvcc <- function(ID,
   }
   
   if (is.null(beta)) {
-    beta <- rnorm(q, sd = 1 / sqrt(q))
+    beta <- rnorm(q, sd = 1 / sqrt(q) / 10)
   }
   
   bi <- map(1:NSbj, ~ MASS::mvrnorm(1, mu = rep(0, r), Sigma = Psi))
