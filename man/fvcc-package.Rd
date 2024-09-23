@@ -1,24 +1,24 @@
-\name{cvarpyp-package}
-\alias{cvarpyp-package}
-\alias{cvarpyp}
+\name{fvcc-package}
+\alias{fvcc-package}
+\alias{fvcc}
 \docType{package}
 \title{
-\packageTitle{cvarpyp}
+\packageTitle{fvcc}
 }
 \description{
-\packageDescription{cvarpyp}
+\packageDescription{fvcc}
 }
 \details{
 
 The DESCRIPTION file:
-\packageDESCRIPTION{cvarpyp}
-\packageIndices{cvarpyp}
+\packageDESCRIPTION{fvcc}
+\packageIndices{fvcc}
 ~~ An overview of how to use the package, including the most important functions ~~
 }
 \author{
-\packageAuthor{cvarpyp}
+\packageAuthor{fvcc}
 
-Maintainer: \packageMaintainer{cvarpyp}
+Maintainer: \packageMaintainer{fvcc}
 }
 \references{
 ~~ Literature or other references for background information ~~
