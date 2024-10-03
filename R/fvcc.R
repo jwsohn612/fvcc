@@ -19,6 +19,7 @@ NULL
 #' @param nu The concentration parameter
 #' @param Psi An initial covariance matrix of the random effects
 #' @param beta An initial vector of the fixed effects
+#' @param return_var_coefs Put FALSE to obtain intact posterior samples
 #'
 #' @examples
 #' library(fvcc)
